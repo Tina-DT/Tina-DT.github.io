@@ -5,10 +5,10 @@ var intervallNummern = [];
 
 function intervalFunktion(drehRichtung) {
     letztesBild += drehRichtung;
-    if (letztesBild > 8)
+    if (letztesBild > 7)
         letztesBild = 1;
     if (letztesBild < 1)
-        letztesBild = 8;
+        letztesBild = 7;
     var bild = document.getElementById('i');
     bild.setAttribute("src", "bilder/rad" + letztesBild + ".png");
 }
