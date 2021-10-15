@@ -17,13 +17,13 @@
 
             // Compile vertex shader.
             var vsSource = 'attribute vec2 pos;'+
-            'void main(){ gl_Position = vec4((pos-5.0) *0.2, 0, 1); }';
+            'void main(){ gl_Position = vec4((pos-7.0) *0.1, 0, 1); }';
             var vs = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vs, vsSource);
             gl.compileShader(vs);
 
             // Compile fragment shader.
-            var fsSouce = 'void main() { gl_FragColor = vec4(0,1,0,1); }';
+            var fsSouce = 'void main() { gl_FragColor = vec4(1,0,1,1); }';
             var fs = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource(fs, fsSouce);
             gl.compileShader(fs);
