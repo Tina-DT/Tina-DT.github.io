@@ -36,7 +36,7 @@
             gl.useProgram(prog);
 
             // Build the sledge
-                       var punktArray = [];
+            var punktArray = [];
             var lastPoint = {x: 1, y: -2};
             punktArray.push(lastPoint.x);
             punktArray.push(lastPoint.y);
@@ -52,7 +52,7 @@
             // Setup vertex buffer object.
             var vbo = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices_Sledge, gl.STATIC_DRAW);
 
             // Connect vertex buffer to attribute variable.
             var posAttrib = gl.getAttribLocation(prog, 'pos');
