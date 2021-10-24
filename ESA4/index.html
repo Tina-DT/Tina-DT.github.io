@@ -2,8 +2,8 @@
 <html>
     <body>
         <canvas id="canvas" width="750" height="750"></canvas>
-        <h1 style="position:absolute; top:800px; left:10px">EA 4 - Parametrisierte Flächen: Tropf von der Decke</h1>
-        <h3 style="position:absolute; top:850px; left:10px">Tropf Formel wurde von der <a href="http://www.3d-meier.de/tut3/Seite212.html" target="_blank">Kiss Surface</a> Gleichung umgesetzt</h1>
+        <h1 style="position:absolute; top:800px; left:10px">EA 4 - Parametrisierte Flächen: Tropfen von der Decke</h1>
+        <h3 style="position:absolute; top:850px; left:10px">Tropfen Formel wurde von der <a href="http://www.3d-meier.de/tut3/Seite212.html" target="_blank">Kiss Surface</a> Gleichung umgesetzt</h1>
         <script>
             // Get the WebGL context.
             var canvas = document.getElementById('canvas');
@@ -162,10 +162,10 @@
 
                         var iVertex = i*(m+1) + j;
 
-                        //Hier wird Wasser dargestellt, die Tropen entgegen nimmt
-                        var x = r * Math.cos(t); //r gibt der Radius von der Mitte nach Außen 0 bis 1 an
-                        var y = -0.85 + Math.cos(r*10)/10; //um den Bereich etwas enger zu machen wird die Math.cos(r*10) durch 10 dividiert; -0,85 schiebt die Form Richtung unteren Rand, wo wir einen Bereich zwischen 1 und -1 in der Koordinatensystem zur Verfügung haben
-                        var z = r * Math.sin(t); //Um das Ganze konsisten zu halten, wird die Berechnung für die Tiefe mit angegeben, obwohl die Auswirkung dadurch momentan nicht sichtbar ist
+                        //Hier wird Wasser dargestellt, das Tropfen entgegen nimmt
+                        var x = r * Math.cos(t); //r gibt den Radius von der Mitte nach Außen 0 bis 1 an
+                        var y = -0.85 + Math.cos(r*10)/10; //um den Bereich etwas enger zu machen, wird die Math.cos(r*10) durch 10 dividiert; -0,85 schiebt die Form Richtung unteren Rand, wo wir einen Bereich zwischen 1 und -1 im Koordinatensystem zur Verfügung haben
+                        var z = r * Math.sin(t); //Um das Ganze konsistent zu halten, wird die Berechnung für die Tiefe mit angegeben, obwohl die Auswirkung dadurch momentan nicht sichtbar ist
 
                         // Set vertex positions.
                         vertices[iVertex * 7] = x;
@@ -227,7 +227,7 @@
 
                         var iVertex = i*(m+1) + j;
                         
-                        //Hier wird die Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) benutzt und 180 grad gedreht, um eine tropfende Decke darzustellen
+                        //Hier wird die Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) benutzt und um 180 grad gedreht, um eine tropfende Decke darzustellen
                         var x = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.cos(t);
                         var y = 0.2 - (r/1.2);
                         var z = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.sin(t);
