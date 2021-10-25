@@ -51,8 +51,8 @@
             // Positions, index data.
             var vertices, indicesLinies, indicesTris;
             // Fill the data arrays.
-            // Draw the WATER:
-            createVertexDataForWater();
+            // Draw:
+            createVertexDataForDraw();
 
             // Setup position vertex buffer object.
             var vboPos = gl.createBuffer();
@@ -68,10 +68,6 @@
             // Setup constant color.
             //3|4|5-6|2|4|5-3|5|2-5|7|8|9-0|6|3...
             var colAttrib = gl.getAttribLocation(prog, 'col');
-            //gl.vertexAttribPointer(colAttrib, 4,
-            //    gl.FLOAT, false, 28, 12);
-            //gl.enableVertexAttribArray(colAttrib);
-            //gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
 
             // Setup index buffer object for Lines
             var iboLines = gl.createBuffer();
@@ -104,68 +100,39 @@
             gl.drawElements(gl.LINES,
                 iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
-            //Draw the DROP:
-            createVertexDataForDrop();
 
-            // Setup position vertex buffer object.
-            gl.bufferData(gl.ARRAY_BUFFER,
-                vertices, gl.STATIC_DRAW);
-
-            // Setup index buffer object for Lines
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-                indicesLinies, gl.STATIC_DRAW);
-            iboLines.numberOfElements = indicesLinies.length;
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-                indicesTris, gl.STATIC_DRAW);
-            iboTris.numberOfElements = indicesTris.length;
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-            // Clear framebuffer and render primitives.
-            gl.vertexAttribPointer(colAttrib, 4,
-                gl.FLOAT, false, 28, 12);
-            gl.enableVertexAttribArray(colAttrib);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
-            gl.drawElements(gl.TRIANGLES,
-                iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
-            gl.disableVertexAttribArray(colAttrib);
-
-            gl.vertexAttrib4f(colAttrib, 0, 1, 0, 1);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
-            gl.drawElements(gl.LINES,
-                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
-
-                //Data for the Water
-            function createVertexDataForWater(){
+            function createVertexDataForDraw(){
                 var n = 32;
                 var m = 20;
                 // Positions.
-                vertices = new Float32Array((4+3)*(n+1)*(m+1));
+                var verticesCountOfOneObject = (n+1)*(m+1)
+                vertices = new Float32Array(2*(4+3)*verticesCountOfOneObject);
                 // Index data for Linestrip.
-                indicesLinies = new Uint16Array(2 * 2 * n * m);
-                indicesTris = new Uint16Array(3 * 2 * n * m);
-
-                var dt = 2*Math.PI/n;
+                indicesLinies = new Uint16Array(2 * 2 * 2 * n * m);
+                indicesTris = new Uint16Array(3 * 2 * 2 * n * m);
+                
+                //Data for the Water
+                var dt = 2*Math.PI/n; // calculates the steps size, through angle for one part of the object
                 var dr = 1/m;
                 // Counter for entries in index array.
                 var iIndex = 0;
                 var iTris = 0;
 
+                //Loop for the Wasser representation 
                 // Loop angle t.
-                for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) { //t wird hier berechnet, sodass die Fläche eine Drehung bekommt
+                for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) { //t is calculated here as an angle, so that the paramentring can be done
 
                     // Loop radius r.
                     for(var j=0, r=0; j <= m; j++, r += dr){
 
                         var iVertex = i*(m+1) + j;
 
-                        //Hier wird Wasser dargestellt, das Tropfen entgegen nimmt
-                        var x = r * Math.cos(t); //r gibt den Radius von der Mitte nach Außen 0 bis 1 an
-                        var y = -0.85 + Math.cos(r*10)/10; //um den Bereich etwas enger zu machen, wird die Math.cos(r*10) durch 10 dividiert; -0,85 schiebt die Form Richtung unteren Rand, wo wir einen Bereich zwischen 1 und -1 im Koordinatensystem zur Verfügung haben
-                        var z = r * Math.sin(t); //Um das Ganze konsistent zu halten, wird die Berechnung für die Tiefe mit angegeben, obwohl die Auswirkung dadurch momentan nicht sichtbar ist
+                        //Hier will the water be created, where the water receives the drops
+                        var x = r * Math.cos(t); //r indicates the radius from the center outwards 0 to 1
+                        var y = -0.85 + Math.cos(r*10)/10; //*10 within the cosine function is used to make the ripple effect visible more quickly.
+                        // To make the range horizontally a little narrower the Math.cos(r*10) is divided by 10;  
+                        //-0,85 pushes the shape towards the bottom, where we have a range between 1 and -1 available in the coordinate system
+                        var z = r * Math.sin(t); //To keep it consistent, the calculation for the depth is included, although the effect of this is not currently visible
 
                         // Set vertex positions.
                         vertices[iVertex * 7] = x;
@@ -202,32 +169,20 @@
                         }
                     }
                 }
-            }
+            
 
-            function createVertexDataForDrop(){
-                var n = 32;
-                var m = 20;
-                // Positions.
-                vertices = new Float32Array((4+3)*(n+1)*(m+1));
-                // Index data for Linestrip.
-                indicesLinies = new Uint16Array(2 * 2 * n * m);
-                indicesTris = new Uint16Array(3 * 2 * n * m);
-
-                var dt = 2*Math.PI/n;
                 var dr = 2/m;
-                // Counter for entries in index array.
-                var iIndex = 0;
-                var iTris = 0;
 
+                //Loop for drop representation
                 // Loop angle t.
                 for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) {
 
                     // Loop radius r.
                     for(var j=0, r=-1; j <= m; j++, r += dr){
 
-                        var iVertex = i*(m+1) + j;
+                        var iVertex = verticesCountOfOneObject + i*(m+1) + j;
                         
-                        //Hier wird die Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) benutzt und um 180 grad gedreht, um eine tropfende Decke darzustellen
+                        //Here will the Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) be used and rotated 180 degrees to represent a dripping ceiling
                         var x = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.cos(t);
                         var y = 0.2 - (r/1.2);
                         var z = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.sin(t);
