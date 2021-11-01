@@ -1,0 +1,75 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<title>ESA5 - Kamerabewegung </title>
+		<canvas id="canvas" width="750" height="750"></canvas>
+
+		<script src="ext/gl-matrix.js"></script>
+		<script src="GVT_Src_vertexData_kiss.js"></script>
+		<script src="GVT_Src_vertexData_water.js"></script>
+		<script src="GVT_Src_vertexData_plane.js"></script>
+		<script src="KAP_Src_tpl.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+	
+				vec3 tempColor = (aNormal + 1.0) / 2.0;
+				vColor = vec4(pow(tempColor.rgb, vec3(0.4545)), 1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<div class="wrapper">
+		<nav>
+			<div class="nav-wrapper">
+				<h1 class="titel" style="padding-left:10px">EA 5 - Kamerabewegung: Tropfen von der Decke</h1>
+				<h3 class="titel" style="padding-left:10px">Tropfen Formel wurde von der <a href="http://www.3d-meier.de/tut3/Seite212.html" target="_blank">Kiss Surface</a> Gleichung umgesetzt</h1>
+			</div>
+		</nav>
+
+		<div id="container" class="container">
+			<div class="col s12">
+				<div class="card">
+
+					<div class="card-content">
+						<!--Content-->
+						<h4>Keystrokes</h4>
+
+						<p><b>O:</b> Schaltet den Modus für die orthogonale Ansicht ein, mit den Tasten W, S, A, B und D
+						<p><b>F:</b> Schaltet den Modus für die Frustum-Ansicht ein, wobei die Tasten B und Shift+B verwendet werden können
+						<p><b>P:</b> Schaltet den perspektivischen Ansichtsmodus ein, mit zusätzlichem Tastendruck V und Shift+V, aber der Tastendruck B funktioniert nicht
+						<p><b>W:</b> Bewegt die Kamera nach oben
+						<p><b>S:</b> Bewegt die die Kamera nach unten
+						<p><b>A:</b> Bewegt die Kamera nach links
+						<p><b>D:</b> Bewegt die Kamera nach rechts
+						<p><b>C:</b> Der Tastendruck C bewirkt die gleiche Bewegung der Kamera wie der Tastendruck A und Shift+C bewirkt die gleiche Bewegung der Kamera wie der Tastendruck D
+						<p><b>Q:</b> Tastendruck Q ändert den Abstand der Kamera zu dem Punkt, auf den sie schaut
+						<p><b>E:</b> Tastendruck E ändert den Abstand der Kamera zu dem Punkt, auf den sie blickt, in die entgegengesetzte Richtung zu Q
+						<p><b>V:</b> Tastendruck V und Shift+V ändert die perspektivische Ansicht nur im Perspektivmodus (Perspektivmodus mit Tastendruck P einschalten)
+						<p><b>B:</b> Tastendruck B und Shift+B ändert die Ansicht links rechts oben unten
+
+					</div>
+
+
+				</div>
+			</div>
+		</div>
+		</div>
+	</body>
+</html>

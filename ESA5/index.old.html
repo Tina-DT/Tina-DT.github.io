@@ -1,0 +1,173 @@
+<!DOCTYPE html5>
+<html>
+    <body>
+        <canvas id="canvas" width="750" height="750"></canvas>
+        <h1 style="position:absolute; top:800px; left:10px">EA 4 - Parametrisierte Flächen: Tropfen von der Decke</h1>
+        <h3 style="position:absolute; top:850px; left:10px">Tropfen Formel wurde von der <a href="http://www.3d-meier.de/tut3/Seite212.html" target="_blank">Kiss Surface</a> Gleichung umgesetzt</h1>
+        <script>
+            // Get the WebGL context.
+            var canvas = document.getElementById('canvas');
+            var gl = canvas.getContext('experimental-webgl');
+
+            // Pipeline setup.
+            gl.clearColor(.95, .95, .95, 1);
+            // Backface culling.
+            gl.frontFace(gl.CCW);
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.BACK);
+
+            // Compile vertex shader. 
+            var vsSource = '' + 
+                'attribute vec3 pos;' + 
+                'attribute vec4 col;' + 
+                'varying vec4 color;' + 
+                'void main(){' + 'color = col;' + 
+                'gl_Position = vec4(pos, 1);' +
+                '}';
+            var vs = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vs, vsSource);
+            gl.compileShader(vs);
+
+            // Compile fragment shader.
+            fsSouce = 'precision mediump float;' + 
+                'varying vec4 color;' + 
+                'void main() {' + 
+                'gl_FragColor = color;' + 
+                '}';
+            var fs = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fs, fsSouce);
+            gl.compileShader(fs);
+
+            // Link shader together into a program.
+            var prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.bindAttribLocation(prog, 0, "pos");
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            // Vertex data.
+            //var 
+            // Positions, index data.
+            var vertices, indicesLinies, indicesTris;
+            // Fill the data arrays.
+            // Draw:
+            createVertexDataForDraw();
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER,
+                vertices, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 3,
+                gl.FLOAT, false, 28, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            // Setup constant color.
+            //3|4|5-6|2|4|5-3|5|2-5|7|8|9-0|6|3...
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+
+            // Setup index buffer object for Lines
+            var iboLines = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+                indicesLinies, gl.STATIC_DRAW);
+            iboLines.numberOfElements = indicesLinies.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            var iboTris = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+                indicesTris, gl.STATIC_DRAW);
+            iboTris.numberOfElements = indicesTris.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Clear framebuffer and render primitives.
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            gl.vertexAttribPointer(colAttrib, 4,
+                gl.FLOAT, false, 28, 12);
+            gl.enableVertexAttribArray(colAttrib);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.drawElements(gl.TRIANGLES,
+                iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+            gl.disableVertexAttribArray(colAttrib);
+
+            gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.drawElements(gl.LINES,
+                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+
+            function createVertexDataForDraw(){
+                var n = 32;
+                var m = 20;
+                // Positions.
+                vertices = new Float32Array((4+3)*(n+1)*(m+1));
+                // Index data for Linestrip.
+                indicesLinies = new Uint16Array(2 * 2 * n * m);
+                indicesTris = new Uint16Array(3 * 2 * n * m);
+                
+                // Counter for entries in index array.
+                var iIndex = 0;
+                var iTris = 0;
+            
+                var du = 2*Math.PI/n;
+                var dv = Math.PI/m;
+                var r = 0.8;
+
+                //Loop for drop representation
+                // Loop angle t.
+                for(var i=0, u=0; i <= n; i++, u += du) {
+
+                    // Loop radius r.
+                    for(var j=0, v=0; j <= m; j++, v += dv){
+
+                        var iVertex = i*(m+1) + j;
+                        
+                        //Here will the Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) be used and rotated 180 degrees to represent a dripping ceiling
+                        var x = r * Math.sin(v)*Math.cos(u);
+                        var y = r * Math.sin(v)*Math.sin(u);
+                        var z = r * Math.cos(v);
+
+                        // Set vertex positions.
+                        vertices[iVertex * 7] = x;
+                        vertices[iVertex * 7 + 1] = y;
+                        vertices[iVertex * 7 + 2] = z;
+
+                        // Farbe:
+                        vertices[iVertex * 7 + 3] = v / (2*Math.PI);
+                        vertices[iVertex * 7 + 4] = 0.5;
+                        vertices[iVertex * 7 + 5] = 0;
+                        vertices[iVertex * 7 + 6] = 1;
+
+                        // Set index.
+                        // Line on beam.
+                        if(j>0 && i>0){
+                            indicesLinies[iIndex++] = iVertex - 1;
+                            indicesLinies[iIndex++] = iVertex;
+                        }
+
+                        // Line on ring.
+                        if(j>0 && i>0){
+                            indicesLinies[iIndex++] = iVertex-(m+1);
+                            indicesLinies[iIndex++] = iVertex;
+                        }
+
+                        if(j>0 && i>0){
+                            indicesTris[iTris++] = iVertex;
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);
+                            //
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1) - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);
+                        }
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
