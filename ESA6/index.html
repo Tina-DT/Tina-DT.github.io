@@ -1,0 +1,86 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<script src="ext/gl-matrix.js"></script>
+		<script src="GVT_Src_vertexData_sphere.js"></script>
+		<script src="GVT_Src_vertexData_torus.js"></script>
+		<script src="GVT_Src_vertexData_plane.js"></script>
+		<script src="TFM_Src_tpl.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+
+			uniform vec4 uColor;
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+			gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+			
+			vec3 tNormal = uNMatrix * aNormal;
+
+			vColor = vec4((tNormal.zzz + 1.0) / 2.0, 1.0);
+			vColor = uColor * vColor;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+			gl_FragColor = vColor;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<canvas id="canvas" width="500" height="500"></canvas>
+		<div class="wrapper">
+			<nav>
+				<div class="nav-wrapper">
+					<h1 class="titel" style="padding-left:10px">ESA 6 - Objekte bewegen - fliegende Kugeln</h1>
+				</div>
+			</nav>
+	
+			<div id="container" class="container">
+				<div class="col s12">
+					<div class="card">
+	
+						<div class="card-content">
+							<!--Content-->
+							<h3><strong>Keystrokes</strong></h3>
+
+							<h4><u> Interaktive Modellaktion:</u></h4>
+							<ul>
+								<li><p><b>K:</b> Ein Klick startet die Animation, zweiter Klick beendet die Animation</li>
+							</ul>
+							<h4><u>Projektion der Szene ändern:</u></h4>
+							<ul>
+							<li><p><b>O:</b> Schaltet den Modus für die orthogonale Ansicht ein</li>
+							<li><p><b>F:</b> Schaltet den Modus für die Frustum-Ansicht ein, wobei die Tasten B und Shift+B verwendet werden können</li>
+							<li><p><b>P:</b> Schaltet den perspektivischen Ansichtsmodus ein, mit zusätzlichem Tastendruck V und Shift+V, aber der Tastendruck B funktioniert nicht</li>
+							</ul>
+
+							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
+							<ul>
+							<li><p><b>C:</b> Kamera umkreisen lassen</li>
+							<li><p><b>H:</b> Kamera nach oben und unten bewegen</li>
+							<li><p><b>D:</b> Abstand der Kamera zur Mitte. Mit Shift+D wird die Bewegung in entgegengesetzte Richtung ausgeführt</li>
+							<li><p><b>V:</b> Kamerabewegungen im Bogenmaß. Mit Shift+V wird die Bewegung in entgegengesetzte Richtung ausgeführt</li>
+							<li><p><b>B:</b> Abmessungen der kameranahen Ebene</li>
+							</ul>
+
+							
+							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
+
+						</div>
+	
+	
+					</div>
+				</div>
+			</div>
+			</div>
+	</body>
+</html>
