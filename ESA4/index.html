@@ -2,7 +2,7 @@
 <html>
     <body>
         <canvas id="canvas" width="750" height="750"></canvas>
-        <h1 style="position:absolute; top:800px; left:10px">EA 4 - Parametrisierte Flächen: Tropfen von der Decke</h1>
+        <h1 style="position:absolute; top:800px; left:10px">EA 4 - Parametrisierte Flächen: Tropfen von der Decke in den Brunnen</h1>
         <h3 style="position:absolute; top:850px; left:10px">Tropfen Formel wurde von der <a href="http://www.3d-meier.de/tut3/Seite212.html" target="_blank">Kiss Surface</a> Gleichung umgesetzt</h1>
         <script>
             // Get the WebGL context.
@@ -12,9 +12,9 @@
             // Pipeline setup.
             gl.clearColor(.95, .95, .95, 1);
             // Backface culling.
-            gl.frontFace(gl.CCW);
-            gl.enable(gl.CULL_FACE);
-            gl.cullFace(gl.BACK);
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
 
             // Compile vertex shader. 
             var vsSource = '' + 
@@ -106,10 +106,10 @@
                 var m = 20;
                 // Positions.
                 var verticesCountOfOneObject = (n+1)*(m+1)
-                vertices = new Float32Array(2*(4+3)*verticesCountOfOneObject);
+                vertices = new Float32Array(3*(4+3)*verticesCountOfOneObject);
                 // Index data for Linestrip.
-                indicesLinies = new Uint16Array(2 * 2 * 2 * n * m);
-                indicesTris = new Uint16Array(3 * 2 * 2 * n * m);
+                indicesLinies = new Uint16Array(2 * 3 * 2 * n * m);
+                indicesTris = new Uint16Array(3 * 3 * 2 * n * m);
                 
                 //Data for the Water
                 var dt = 2*Math.PI/n; // calculates the steps size, through angle for one part of the object
@@ -118,7 +118,7 @@
                 var iIndex = 0;
                 var iTris = 0;
 
-                //Loop for the Wasser representation 
+                //Loop for the Fountain-Base representation 
                 // Loop angle t.
                 for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) { //t is calculated here as an angle, so that the paramentring can be done
 
@@ -158,11 +158,12 @@
                             indicesLinies[iIndex++] = iVertex;
                         }
 
+                        //The different surfaces
                         if(j>0 && i>0){
                             indicesTris[iTris++] = iVertex;
                             indicesTris[iTris++] = iVertex - 1;
                             indicesTris[iTris++] = iVertex - (m+1);
-                            //
+                            
                             indicesTris[iTris++] = iVertex - 1;
                             indicesTris[iTris++] = iVertex - (m+1) - 1;
                             indicesTris[iTris++] = iVertex - (m+1);
@@ -183,8 +184,8 @@
                         var iVertex = verticesCountOfOneObject + i*(m+1) + j;
                         
                         //Here will the Kiss Surface (http://www.3d-meier.de/tut3/Seite212.html) be used and rotated 180 degrees to represent a dripping ceiling
-                        var x = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.cos(t);
-                        var y = 0.2 - (r/1.2);
+                        var x = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.cos(t) / 1.3;
+                        var y = 0.32 - (r/1.5);
                         var z = Math.pow(r, 2) * Math.sqrt((1-r)/2.0)*Math.sin(t);
 
                         // Set vertex positions.
@@ -193,9 +194,9 @@
                         vertices[iVertex * 7 + 2] = z;
 
                         // Farbe:
-                        vertices[iVertex * 7 + 3] = t / (2*Math.PI);
-                        vertices[iVertex * 7 + 4] = 0.5;
-                        vertices[iVertex * 7 + 5] = 0;
+                        vertices[iVertex * 7 + 3] = (y+1.1)*t/(Math.PI*2);
+                        vertices[iVertex * 7 + 4] = y;
+                        vertices[iVertex * 7 + 5] = 1-y;
                         vertices[iVertex * 7 + 6] = 1;
 
                         // Set index.
@@ -211,11 +212,63 @@
                             indicesLinies[iIndex++] = iVertex;
                         }
 
+                        //The different surfaces
                         if(j>0 && i>0){
                             indicesTris[iTris++] = iVertex;
                             indicesTris[iTris++] = iVertex - 1;
                             indicesTris[iTris++] = iVertex - (m+1);
-                            //
+                            
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1) - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);
+                        }
+                    }
+                }
+
+                //Fountain mitte
+                var dr = 1/m;
+                for(var i=0, t=Math.PI/17; i <= n; i++, t += dt) {
+
+                    // Loop for the flowerlooking fountain.
+                    for(var j=0, r=0; j <= m; j++, r += dr){
+                    
+                        var iVertex = 2*verticesCountOfOneObject + i*(m+1) + j;
+
+                        //own calculations of all cardinal points
+                        var x = (r*(Math.cos(t+Math.PI/2) + (Math.cos((4*t)+Math.PI/2)/4)))/4;
+                        var y = -0.62+(Math.cos(r*Math.PI)+Math.cos(r*Math.PI*4)/4)/-4;
+                        var z = (r*(Math.cos(t) + (Math.cos(4*t)/4)))/4;
+                    
+                        // Set vertex positions.
+                        vertices[iVertex * 7] = x;
+                        vertices[iVertex * 7 + 1] = y;
+                        vertices[iVertex * 7 + 2] = z;
+                    
+                        // Farbe:
+                        vertices[iVertex * 7 + 3] = y + 1.3;
+                        vertices[iVertex * 7 + 4] = 0.1 - y;
+                        vertices[iVertex * 7 + 5] = y + 0.7;
+                        vertices[iVertex * 7 + 6] = 1;
+                    
+                        // Set index.
+                        // Line on beam.
+                        if(j>0 && i>0){
+                            indicesLinies[iIndex++] = iVertex - 1;
+                            indicesLinies[iIndex++] = iVertex;
+                        }
+                    
+                        // Line on ring.
+                        if(j>0 && i>0){
+                            indicesLinies[iIndex++] = iVertex-(m+1);
+                            indicesLinies[iIndex++] = iVertex;
+                        }
+                        
+                        //The different surfaces
+                        if(j>0 && i>0){
+                            indicesTris[iTris++] = iVertex;
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);
+                            
                             indicesTris[iTris++] = iVertex - 1;
                             indicesTris[iTris++] = iVertex - (m+1) - 1;
                             indicesTris[iTris++] = iVertex - (m+1);
