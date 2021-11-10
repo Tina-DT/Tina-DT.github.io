@@ -2,36 +2,37 @@
 <html>
 	<head>
 		<script src="ext/gl-matrix.js"></script>
-		<script src="GVT_Src_vertexData_sphere.js"></script>
-		<script src="GVT_Src_vertexData_torus.js"></script>
 		<script src="GVT_Src_vertexData_plane.js"></script>
-		<script src="TFM_Src_tpl.js"></script>
+		<script src="GVT_Src_vertexData_sphere.js"></script>
+		<script src="GVT_Src_vertexData_cylinder.js"></script>
+		<script src="SHA_Src_tpl.js"></script>
 		<script type="x-shader/x-vertex" id="vertexshader">
+			precision mediump float;
+			
 			attribute vec3 aPosition;
 			attribute vec3 aNormal;
-
-			uniform vec4 uColor;
+			
 			uniform mat4 uPMatrix;
 			uniform mat4 uMVMatrix;
 			uniform mat3 uNMatrix;
-
-			varying vec4 vColor;
-
-			void main(){
-			gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+			uniform vec4 uColor;
 			
-			vec3 tNormal = uNMatrix * aNormal;
-
-			vColor = vec4((tNormal.zzz + 1.0) / 2.0, 1.0);
-			vColor = uColor * vColor;
+			varying vec4 vColor;
+			
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+				
+				vec3 tNormal = uNMatrix * aNormal;
+			
+				vColor = uColor;
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader">
 			precision mediump float;
 			varying vec4 vColor;
-
+			
 			void main() {
-			gl_FragColor = vColor;
+				gl_FragColor = vec4(vColor.rgb * gl_FragCoord.zzz, vColor.a); //representation of the gray depth information
 			}
 		</script>
 	</head>
@@ -40,7 +41,7 @@
 		<div class="wrapper">
 			<nav>
 				<div class="nav-wrapper">
-					<h1 class="titel" style="padding-left:10px">ESA 6 - Objekte bewegen - fliegende Kugeln</h1>
+					<h1 class="titel" style="padding-left:10px">ESA 7 - Z-Buffer Visualisierung - Zeppelin</h1>
 				</div>
 			</nav>
 	
@@ -52,10 +53,7 @@
 							<!--Content-->
 							<h3><strong>Keystrokes</strong></h3>
 
-							<h4><u> Interaktive Modellaktion:</u></h4>
-							<ul>
-								<li><p><b>K:</b> Ein Klick startet die Animation, zweiter Klick beendet die Animation</li>
-							</ul>
+							
 							<h4><u>Projektion der Szene ändern:</u></h4>
 							<ul>
 							<li><p><b>O:</b> Schaltet den Modus für die orthogonale Ansicht ein, wobei die Tasten <b>B</b> und <b>Shift+B</b> verwendet werden können. Der Tastendruck <b style="color:red;">V</b> funktioniert hier <u style="color:red;">nicht</u></li>
@@ -65,11 +63,12 @@
 
 							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
 							<ul>
-							<li><p><b>C:</b> Kamera umkreisen lassen</li>
-							<li><p><b>H:</b> Kamera nach oben und unten bewegen</li>
-							<li><p><b>D:</b> Abstand der Kamera zur Mitte. Mit Shift+D wird die Bewegung in entgegengesetzte Richtung ausgeführt</li>
+							<li><p><b>Pfeil-Links, A, Pfeil-Rechts, D und C:</b> Kamera umkreisen lassen. </li>
+
+							<li><p><b>Pfeil-Unten, S, Pfeil-Oben, W und H:</b> Kamera nach oben und unten bewegen. </li>
+							<li><p><b>U:</b> Abstand der Kamera zur Mitte. Mit Shift+U wird die Bewegung in entgegengesetzte Richtung ausgeführt</li>
 							<li><p><b>V:</b> Kamerabewegungen im Bogenmaß. Mit Shift+V wird die Bewegung in entgegengesetzte Richtung ausgeführt</li>
-							<li><p><b>B:</b> Abmessungen der kameranahen Ebene</li>
+							<li><p><b>B:</b> Abmessungen der kameranahen Ebene (funktioniert <u>nicht</u> in den perspektivischen Ansichtsmodus)</li>
 							</ul>
 
 						</div>
