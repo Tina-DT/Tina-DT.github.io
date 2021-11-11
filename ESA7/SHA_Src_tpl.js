@@ -147,6 +147,18 @@ var app = ( function() {
 		createModel("cylinder", fs, [1, 1, 1, 1], [0, 0, 0], [0, Math.PI/2, 0], [0.15, 0.15, 0.5]);
 		createModel("sphere", fs, [1, 1, 1, 1], [0.5, 0, 0], [0, Math.PI/2, 0], [0.15, 0.15, 0.15]);
 
+		var buildBuilding = function(x, y, z, b, h)
+		{
+			createModel("cylinder", fs, [1, 1, 1, 1], [x, y, z], [-Math.PI/2, 0, 0], [b, b, h - 0.4]);
+			createModel("cone", fs, [1, 1, 1, 1], [x, y + h, z], [Math.PI/2, 0, 0], [b, b, 0.4]);
+		}
+		//Building a City using a function with base models of cylinder und cone
+		buildBuilding(-0.5, -0.8, -1.4, 0.25, 1.8);
+
+		buildBuilding(-1.0, -0.8, 1.3, 0.2, 1.0);
+		buildBuilding(-1.7, -0.8, 1.0, 0.2, 1.0);
+		buildBuilding(-1.4, -0.8, 0.7, 0.2, 1.0);
+
 		// Select one model that can be manipulated interactively by user.
 		interactiveModel = models[0];
 	}
@@ -407,7 +419,7 @@ var app = ( function() {
 
 		// Setup normal VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
-		gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, true, 0, 0);
 
 		// Setup rendering tris.
 		var fill = (model.fillstyle.search(/fill/) != -1);
