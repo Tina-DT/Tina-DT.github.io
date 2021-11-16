@@ -1,0 +1,161 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<script src="ext/gl-matrix.js"></script>
+		<script src="GVT_Src_vertexData_plane.js"></script>
+		<script src="GVT_Src_vertexData_sphere.js"></script>
+		<script src="GVT_Src_vertexData_torus.js"></script>
+		<script src="BEL_Src_tpl.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+			
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+			
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+			
+			void main(){
+				// Calculate vertex position in eye coordinates. 
+				vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+				// Calculate projektion.
+				gl_Position = uPMatrix * tPosition;
+			
+				vNormal = normalize(uNMatrix * aNormal);
+				
+				vPosition = tPosition;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+
+			// Ambient light.
+			uniform vec3 ambientLight;
+			
+			// Pointlights.
+			const int MAX_LIGHT_SOURCES = 8;
+			struct LightSource {
+				bool isOn;
+				vec3 position;
+				vec3 color;
+			};
+			uniform LightSource light[MAX_LIGHT_SOURCES];
+			
+			// Material.
+			struct PhongMaterial {
+				vec3 ka;
+				vec3 kd;
+				vec3 ks;
+				float ke; 
+			};
+			uniform PhongMaterial material;
+
+			// Phong illumination for single light source,
+			// no ambient light.
+			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
+			
+				vec3 L = l.color;
+
+    			vec3 s = normalize(l.position - p); //direction vector to the light source 
+    			vec3 r = reflect(-s, n); //reflection vector of the light from the light source, reflection of from the normal line
+	
+    			float sn = max( dot(s,n), 0.0); //calculation of the deffus light
+    			float rv = pow(max( dot(r,v), 0.0), material.ke); //calculation of the spekular light
+				
+
+				//from a certain threshold value of the deffus light, only then is the specular light observed
+				//responsible for the cell shader (toon shader)
+                sn = sn > 0.6 ? 0.8 : 0.0;  //deffus light
+                rv = rv > 0.6 && sn > 0.1 ? 0.7 : 0.0; //spekular light
+
+				//add the color and light all together
+    			vec3 diffuse = material.kd * L * sn;
+					
+   				vec3 specular = material.ks * L * rv;
+
+    			return diffuse + specular;
+			}
+			
+			// Phong illumination for multiple light sources
+			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			
+				// Calculate ambient light.
+				vec3 result = material.ka * ambientLight;
+				
+				// Add light from all light sources.
+				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
+					if(light[j].isOn){
+						result += phong(p, n, v, light[j]);
+					}
+				}
+				return result;
+			}
+			
+			void main() {
+				// Calculate view vector.
+				vec3 v = normalize(-vPosition.xyz);	
+
+				gl_FragColor = vec4( phong(vPosition.xyz, normalize(vNormal), v), 1.0);;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<div style="float: left; padding: 20px;">
+			<canvas id="canvas" width="500" height="500"></canvas>
+		</div>
+		<div class="wrapper" style="margin-left: 560; padding: 20px">
+			<nav>
+				<div class="nav-wrapper">
+					<h1 class="titel" style="padding-left:10px">ESA 8 - Lichter auf Kreisbahn mit Toon Shading - Zeppelin über Häuser</h1>
+				</div>
+			</nav>
+	
+			<div id="container" class="container">
+				<div class="col s12">
+					<div class="card">
+	
+						<div class="card-content">
+							<!--Content-->
+							<h3><strong>Keystrokes</strong></h3>
+
+							
+							<h4><u>Projektion der Szene ändern:</u></h4>
+							<ul>
+							<li><p><b>O:</b> Schaltet den Modus für die orthogonale Ansicht ein, wobei die Tasten <b>B</b> und <b>Shift+B</b> verwendet werden können. Der Tastendruck <b style="color:red;">V</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							<li><p><b>F:</b> Schaltet den Modus für die Frustum-Ansicht ein, wobei die Tasten <b>B</b> und <b>Shift+B</b> verwendet werden können. Der Tastendruck <b style="color:red;">V</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							<li><p><b>P:</b> Schaltet den perspektivischen Ansichtsmodus ein, mit zusätzlichem Tastendruck <b>V</b> und <b>Shift+V</b>, aber der Tastendruck <b style="color:red;">B</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							</ul>
+
+							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
+							<ul>
+							<li><p><b> D:</b> Kamera Abstand zu Zentrum mit D und Schift+D anpassen. </li>
+
+							<li><p><b>S: </b> Die Größe des Torus mit S und Schift+S verändern. </li>
+							<li><p><b>C:</b> Orbit mit der Kamera.</li>
+							<li><p><b>H:</b> Kamera mit H und Schift+H hoch und runter bewegen.</li>
+							<li><p><b>B:</b> Abmessungen der kameranahen Ebene, mit Schift+B die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den perspektivischen Ansichtsmodus)</li>
+							<li><p><b>V:</b> Änderung der Sichtfeld-Winkel, mit Schift+V die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den orthogonale und frustum Ansichtsmodus)</li>
+							</ul>
+
+							<h4><u>Licht Bewegung:</u></h4>
+							<ul>
+							<li><p><b>I: </b> List um das Objekt nach rechts automatisch kreisen lassen. </li>
+							<li><p><b>L: </b> List um das Objekt nach links automatisch kreisen lassen. </li>
+							<li><p><b>L nach I drücken: </b> Stoppt das automatische Licht, was um das Objekt nach rechts umkreisen. </li>
+							<li><p><b>I nach L drücken: </b> Stoppt das automatische Licht, was um das Objekt nach links umkreisen. </li>
+							</ul>
+
+						</div>
+	
+	
+					</div>
+				</div>
+			</div>
+			</div>
+	</body>
+</html>

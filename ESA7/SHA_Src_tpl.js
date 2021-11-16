@@ -254,7 +254,7 @@ var app = ( function() {
 			// Use shift key to change sign.
 			var sign = evt.shiftKey ? -1 : 1;
 
-			// Rotate interactiveModel.
+			// Rotate interactiveModel the base.
 			switch(c) {
 				case('KeyX'):
 					interactiveModel.rotate[0] += sign * deltaRotate;
@@ -276,15 +276,15 @@ var app = ( function() {
 			}
 			// Change projection of scene.
 			switch(c) {
-				case('KeyO'):
+				case('KeyO'): //orthogonal
 					camera.projectionType = "ortho";
 					camera.lrtb = 2;
 					break;
-				case('KeyF'):
+				case('KeyF'): //frustum
 					camera.projectionType = "frustum";
 					camera.lrtb = 1.2;
 					break;
-				case('KeyP'):
+				case('KeyP'): //perspective
 					camera.projectionType = "perspective";
 					break;
 			}
@@ -297,6 +297,7 @@ var app = ( function() {
 				case('ArrowRight'):
 				case('KeyD'):
 				case('KeyC'):
+					evt.preventDefault(); //deactivates the browser funktion for the arrow keys
 					camera.zAngle += sign * deltaRotate;
 					break;
 				// Move camera up and down.
@@ -306,6 +307,7 @@ var app = ( function() {
 				case('ArrowUp'):
 				case('KeyW'):
 				case('KeyH'):
+					evt.preventDefault(); //deactivates the browser funktion for the arrow keys
 					camera.eye[1] += sign * deltaTranslate;
 					break;
 				// Camera distance to center.
