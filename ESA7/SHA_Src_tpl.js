@@ -15,6 +15,7 @@ var app = ( function() {
 	var camera = {
 		// Initial position of the camera.
 		eye : [0, 1, 4],
+		overrideX : false,
 		// Point to look at.
 		center : [0, 0, 0],
 		// Roll and pitch of the camera.
@@ -290,15 +291,20 @@ var app = ( function() {
 			}
 			// Camera move and orbit.
 			switch(c) {
+				case('KeyA'):
+					sign *= -1;
+				case('KeyD'):
+					camera.overrideX = true;
+					camera.eye[0] += sign * deltaTranslate;
+					break;
 				// Orbit camera.
 				case('ArrowLeft'):
-				case('KeyA'):
 					sign *= -1; //turn Shift
 				case('ArrowRight'):
-				case('KeyD'):
 				case('KeyC'):
 					evt.preventDefault(); //deactivates the browser funktion for the arrow keys
 					camera.zAngle += sign * deltaRotate;
+					camera.overrideX = false;
 					break;
 				// Move camera up and down.
 				case('ArrowDown'):
@@ -358,11 +364,14 @@ var app = ( function() {
 
 	function calculateCameraOrbit() {
 		// Calculate x,z position/eye of camera orbiting the center.
-		var x = 0, z = 2;
-		camera.eye[x] = camera.center[x];
-		camera.eye[z] = camera.center[z];
-		camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
-		camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+		if (!camera.overrideX)
+		{
+			var x = 0, z = 2;
+			camera.eye[x] = camera.center[x];
+			camera.eye[z] = camera.center[z];
+			camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
+			camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+		}
 	}
 
 	function setProjection() {
