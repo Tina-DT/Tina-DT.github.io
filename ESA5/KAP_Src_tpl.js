@@ -133,6 +133,7 @@ var app = ( function() {
 		var fs = "fillwireframe";
 		createModel("water", fs);
 		createModel("kiss", fs);
+		createModel("rec_sphare", fs);
 		createModel("plane", "wireframe");
 	}
 
@@ -199,6 +200,19 @@ var app = ( function() {
 	}
 
 	function initEventHandler() {
+		document.getElementById("rekBtn").addEventListener("click", function() {
+			models = [];
+			initModels();
+			render();
+		});
+		var inputRek = document.getElementById("rek");
+		inputRek.addEventListener("keyup", function() {
+			if(inputRek.value>7)
+				inputRek.value='7';
+			else if(inputRek.value<0)
+				inputRek.value='0';
+		});
+
 		// Rotation step.
         var deltaRotate = Math.PI / 36;
 		var deltaTranslate = 0.05;
@@ -229,10 +243,10 @@ var app = ( function() {
 					camera.eye[1] -= deltaTranslate; //Move the camera to the bottom
 					break;
 				case('A'):
-					camera.zAngle += deltaRotate; //Move the camera to the left
+					camera.zAngle -= deltaRotate; //Move the camera to the left
 					break;
 				case('D'):
-					camera.zAngle -= deltaRotate; //Move the camera to the right
+					camera.zAngle += deltaRotate; //Move the camera to the right
 					break;
 				case('C'):
                     // Orbit camera.
