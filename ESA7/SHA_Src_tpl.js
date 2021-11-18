@@ -312,6 +312,7 @@ var app = ( function() {
 				// Camera distance to center.
 				case('KeyU'):
 					camera.distance += sign * deltaTranslate;
+					camera.overrideX = false;
 					break;
 				// Camera fovy in radian.	
 				case('KeyV'):	
