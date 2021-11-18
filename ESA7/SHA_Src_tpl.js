@@ -267,14 +267,7 @@ var app = ( function() {
 					interactiveModel.rotate[2] += sign * deltaRotate;
 					break;
 			}
-			// Scale/squeese interactiveModel.
-			switch(c) {
-				case('KeyS'):
-					interactiveModel.scale[0] *= 1 + sign * deltaScale;
-					interactiveModel.scale[1] *= 1 - sign * deltaScale;
-					interactiveModel.scale[2] *= 1 + sign * deltaScale;
-					break;
-			}
+
 			// Change projection of scene.
 			switch(c) {
 				case('KeyO'): //orthogonal
