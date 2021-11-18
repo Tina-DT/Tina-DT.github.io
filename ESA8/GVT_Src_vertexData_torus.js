@@ -1,7 +1,7 @@
 var torus = ( function() {
 
 	function createVertexData() {
-		var n = 16;
+		var n = 32;
 		var m = 32;
 
 		// Positions.

@@ -210,20 +210,20 @@ var app = (function() {
         // Create some default material.
         //var mDefault = createPhongMaterial();
 
-        var mTorus = createPhongMaterial({ka: [0.5, 0.1, 0.1], kd: [0.7, 0.1, 0.1]});
+        var mTorus = createPhongMaterial({ka: [0.1, 0.0, 0.0], kd: [0.7, 0.03, 0.03]});
         createModel("torus", fs, [ 1, 1, 1, 1 ], [ 0, .75, 0 ],
                 [ 0, 0, 0, 0 ], [ 1, 1, 1, 1 ], mTorus);
 
-        var mSphere1 = createPhongMaterial({ka: [0.1, 0.5, 0.1], kd: [0.1, 0.7, 0.1]});
+        var mSphere1 = createPhongMaterial({ka: [0.0, 0.1, 0.0], kd: [0.0, 0.7, 0.0]});
         createModel("sphere", fs, [ 1, 1, 1, 1 ], [ -1.25, .5, 0 ], [ 0, 0,
                 0, 0 ], [ .5, .5, .5 ], mSphere1);
 
-        var mSphere2 = createPhongMaterial({ka: [0.1, 0.1, 0.5], kd: [0.1, 0.1, 0.7]});
+        var mSphere2 = createPhongMaterial({ka: [0.0, 0.0, 0.1], kd: [0.03, 0.03, 0.6]});
         createModel("sphere", fs, [ 1, 1, 1, 1 ], [ 1.25, .5, 0 ], [ 0, 0,
                 0, 0 ], [ .5, .5, .5 ], mSphere2);
 
-        var mPlane = createPhongMaterial({ka:[1.,1.,1.], kd:[.5,.5,.5],           
-            ks:[0.,0.,0.]});
+        var mPlane = createPhongMaterial({ka:[0.5,0.5,0.5], kd:[.5,.5,.5],           
+            ks:[0.,0.,0.], ke:-1.});
         createModel("plane", fs, [ 1, 1, 1, 1 ], [ 0, 0, 0, 0 ], [ 0, 0, 0,
                 0 ], [ 1, 1, 1, 1 ], mPlane);
 

@@ -55,34 +55,38 @@
 			};
 			uniform PhongMaterial material;
 
-			// Phong illumination for single light source,
-			// no ambient light.
-			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
-			
-				vec3 L = l.color;
+			//calc diffuse light and apply only if a specific threshold is meet
+			vec3 diffuseToon(vec3 n, vec3 s, LightSource l, float thre, float multi) {
+				vec3 result = vec3(0.0);
+				if (max(0.0, dot(n, s)) >= thre) {
+					result = l.color * material.kd * multi;
+				}
+				return result;
+			}
 
-    			vec3 s = normalize(l.position - p); //direction vector to the light source 
-    			vec3 r = reflect(-s, n); //reflection vector of the light from the light source, reflection of from the normal line
-	
-    			float sn = max( dot(s,n), 0.0); //calculation of the deffus light
-    			float rv = pow(max( dot(r,v), 0.0), material.ke); //calculation of the spekular light
-				
+			//find an outline for the object
+			vec3 outlineToon(vec3 v, vec3 n, vec3 s, LightSource l) {
+				vec3 result = vec3(1.0);
+				if (material.ke > 0.0 && dot(v, n) < mix(0.1, 0.4, max(0.0, dot(n, s))))
+				{
+					result = vec3(0.01);
+				}
+				return result;
+			}
 
-				//from a certain threshold value of the deffus light, only then is the specular light observed
-				//responsible for the cell shader (toon shader)
-                sn = sn > 0.6 ? 0.8 : 0.0;  //deffus light
-                rv = rv > 0.6 && sn > 0.1 ? 0.7 : 0.0; //spekular light
-
-				//add the color and light all together
-    			vec3 diffuse = material.kd * L * sn;
-					
-   				vec3 specular = material.ks * L * rv;
-
-    			return diffuse + specular;
+			//highlighted spot of reflected lightspot
+			vec3 highlightToon(vec3 n, vec3 s, vec3 v, LightSource l) {
+				vec3 result = vec3(0.0);
+				if (dot(n, s) > 0.0 &&
+					pow(max(0.0, dot(reflect(-s, n), v)), material.ke) > 0.7)
+				{
+					result = material.ks * l.color;
+				}
+				return result;
 			}
 			
-			// Phong illumination for multiple light sources
-			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			// Toon illumination for multiple light sources
+			vec3 toon(vec3 p, vec3 n, vec3 v) {
 			
 				// Calculate ambient light.
 				vec3 result = material.ka * ambientLight;
@@ -90,7 +94,16 @@
 				// Add light from all light sources.
 				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
 					if(light[j].isOn){
-						result += phong(p, n, v, light[j]);
+						//Calc direction of the light
+						vec3 s = normalize(light[j].position - p);
+						//3 steps of diffuse light
+						result = max(result, diffuseToon(n, s, light[j], 0.4, 0.3));
+						result = max(result, diffuseToon(n, s, light[j], 0.6, 0.55));
+						result = max(result, diffuseToon(n, s, light[j], 0.85, 0.8));
+						//calc outline
+						result = min(result, outlineToon(v, n, s, light[j]));
+						//specular light spot
+						result += highlightToon(n, s, v, light[j]);
 					}
 				}
 				return result;
@@ -98,9 +111,13 @@
 			
 			void main() {
 				// Calculate view vector.
-				vec3 v = normalize(-vPosition.xyz);	
+				vec3 v = normalize(-vPosition.xyz);
 
-				gl_FragColor = vec4( phong(vPosition.xyz, normalize(vNormal), v), 1.0);;
+				// Calculate toon-light
+				vec3 color = toon(vPosition.xyz, normalize(vNormal), v);
+
+				//Gamma-Correction
+				gl_FragColor = vec4( pow(color, vec3(0.4545)), 1.0);;
 			}
 		</script>
 	</head>
@@ -133,16 +150,15 @@
 
 							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
 							<ul>
-							<li><p><b> D:</b> Kamera Abstand zu Zentrum mit D und Schift+D anpassen. </li>
+							<li><p><b>D:</b> Kamera Abstand zu Zentrum mit D und Schift+D anpassen. </li>
 
-							<li><p><b>S: </b> Die Größe des Torus mit S und Schift+S verändern. </li>
 							<li><p><b>C:</b> Orbit mit der Kamera.</li>
 							<li><p><b>H:</b> Kamera mit H und Schift+H hoch und runter bewegen.</li>
 							<li><p><b>B:</b> Abmessungen der kameranahen Ebene, mit Schift+B die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den perspektivischen Ansichtsmodus)</li>
 							<li><p><b>V:</b> Änderung der Sichtfeld-Winkel, mit Schift+V die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den orthogonale und frustum Ansichtsmodus)</li>
 							</ul>
 
-							<h4><u>Licht Bewegung:</u></h4>
+							<h4><u style="color:red;">Licht Bewegung:</u></h4>
 							<ul>
 							<li><p><b>I: </b> List um das Objekt nach rechts automatisch kreisen lassen. </li>
 							<li><p><b>L: </b> List um das Objekt nach links automatisch kreisen lassen. </li>
@@ -150,9 +166,14 @@
 							<li><p><b>I nach L drücken: </b> Stoppt das automatische Licht, was um das Objekt nach links umkreisen. </li>
 							</ul>
 
+							<h4><u>Torus verändern:</u></h4>
+							<ul>
+							<li><p><b>X, Y, Z:</b> Turus um die entsprechende Axe drehen. </li>
+							<li><p><b>S: </b> Die Größe des Torus mit S und Schift+S verändern. </li>
+							</ul>
+
 						</div>
-	
-	
+		
 					</div>
 				</div>
 			</div>
