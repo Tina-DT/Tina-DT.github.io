@@ -15,6 +15,7 @@ var app = ( function() {
 	var camera = {
 		// Initial position of the camera.
 		eye : [0, 0, 5],
+		overrideX : false,
 		// Point to look at.
 		center : [0, 0, 0],
 		// Roll and pitch of the camera.
@@ -414,6 +415,7 @@ var app = ( function() {
 				// Camera distance to center.
 				case('KeyU'):
 					camera.distance += sign * deltaTranslate;
+					camera.overrideX = false;
 					break;
 				// Camera fovy in radian.	
 				case('KeyV'):	
@@ -493,11 +495,14 @@ var app = ( function() {
 
 	function calculateCameraOrbit() {
 		// Calculate x,z position/eye of camera orbiting the center.
-		var x = 0, z = 2;
-		camera.eye[x] = camera.center[x];
-		camera.eye[z] = camera.center[z];
-		camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
-		camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+		if (!camera.overrideX)
+		{
+			var x = 0, z = 2;
+			camera.eye[x] = camera.center[x];
+			camera.eye[z] = camera.center[z];
+			camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
+			camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+		}
 	}
 
 	function setProjection() {
@@ -556,7 +561,7 @@ var app = ( function() {
 
 		// Setup normal VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
-		gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
+		gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, true, 0, 0);
 
 		// Setup texture VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
