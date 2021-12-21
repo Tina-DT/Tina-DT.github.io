@@ -241,7 +241,7 @@ var app = ( function() {
 		var mGrey = createPhongMaterial({ka:[1.,1.,1.], kd:[.5,.5,.5], ks:[0.,0.,0.]});
 		var mWhite = createPhongMaterial({ka:[0.8,0.8,0.8], kd:[1,1,1], ks:[0,0,0]});
 	
-		createModel("torus", fs, [1,1,1,1], [0,0,0], [-Math.PI/4.0,0,0.], [2,2,2], mWhite);
+		createModel("torus", fs, [1,1,1,1], [0,0,0], [-Math.PI/4.0,0,0.], [2,2,2], mWhite, "tex/texture.png");
 	
 		// Select one model that can be manipulated interactively by user.
 		interactiveModel = models[0];

@@ -1,6 +1,7 @@
 <!DOCTYPE html5>
 <html>
 	<head>
+		<meta charset="utf-8"/>
 		<script src="ext/gl-matrix.js"></script>
 		<script src="GVT_Src_vertexData_torus.js"></script>
 		<script src="TXR_Src_tpl.js"></script>
@@ -129,8 +130,9 @@
 				}
 				else
 				{
-					float flecken = 0.5 + 0.5*sin(vTextureCoord.s * M_PI * 6.0) * cos(vTextureCoord.t * M_PI * 4.0);
-					return vec4(mix(vec3(0.9, 0.6, 0.2),vec3(0.75, 0.45, 0.05),flecken), 1.0);
+					return texture2D(uTexture, vTextureCoord);
+					//float flecken = 0.5 + 0.5*sin(vTextureCoord.s * M_PI * 6.0) * cos(vTextureCoord.t * M_PI * 4.0);
+					//return vec4(mix(vec3(0.9, 0.6, 0.2),vec3(0.75, 0.45, 0.05),flecken), 1.0);
 				}
 			}
 			
@@ -193,7 +195,7 @@
 								<li><p><b>T:</b> verzerren des Objekts</p></li>
 							</ul>
 
-							<h4 style="color:rgb(245, 116, 206);">Die Textur wurde prozedural generiert.</h4>
+							<h4 style="color:rgb(245, 116, 206);">Das Topping wurde prozedural generiert. Der Teig stammt von hier: https://www.artstation.com/artwork/28x8Vg</h4>
 						</div>
 	
 	
