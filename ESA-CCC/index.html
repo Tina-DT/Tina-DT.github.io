@@ -1,0 +1,171 @@
+<!DOCTYPE html5>
+<html>
+	<head>
+		<script src="ext/gl-matrix.js"></script>
+		<script src="GVT_Src_vertexData_plane.js"></script>
+		<script src="GVT_Src_vertexData_sphere.js"></script>
+		<script src="GVT_Src_vertexData_torus.js"></script>
+		<script src="BEL_Src_tpl.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+			
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+			
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+			
+			void main(){
+				// Calculate vertex position in eye coordinates. 
+				vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+				// Calculate projektion.
+				gl_Position = uPMatrix * tPosition;
+			
+				vNormal = normalize(uNMatrix * aNormal);
+				
+				vPosition = tPosition;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+
+			// Ambient light.
+			uniform vec3 ambientLight;
+			
+			// Pointlights.
+			const int MAX_LIGHT_SOURCES = 8;
+			struct LightSource {
+				bool isOn;
+				vec3 position;
+				vec3 color;
+			};
+			uniform LightSource light[MAX_LIGHT_SOURCES];
+			
+			// Material.
+			struct PhongMaterial {
+				vec3 ka;
+				vec3 kd;
+				vec3 ks;
+				float ke; 
+			};
+			uniform PhongMaterial material;
+
+			// Phong illumination for single light source,
+			// no ambient light.
+			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
+			
+				vec3 L = l.color;
+
+    			vec3 s = normalize(l.position - p); //direction vector to the light source 
+    			vec3 r = reflect(-s, n); //reflection vector of the light from the light source, reflection of from the normal line
+	
+    			float sn = max( dot(s,n), 0.0); //calculation of the deffus light
+    			float rv = pow(max( dot(r,v), 0.0), material.ke); //calculation of the spekular light
+
+				//add the color and light all together
+    			vec3 diffuse = material.kd * L * sn;
+					
+   				vec3 specular = material.ks * L * rv;
+
+    			return diffuse + specular;
+			}
+			
+			// Phong illumination for multiple light sources
+			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			
+				// Calculate ambient light.
+				vec3 result = material.ka * ambientLight;
+				
+				// Add light from all light sources.
+				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
+					if(light[j].isOn){
+						result += phong(p, n, v, light[j]);
+					}
+				}
+				return result;
+			}
+			
+			void main() {
+				// Calculate view vector.
+				vec3 v = normalize(-vPosition.xyz);	
+
+				gl_FragColor = vec4( phong(vPosition.xyz, normalize(vNormal), v), 1.0);;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<div style="float: left; padding: 20px;">
+			<canvas id="canvas" width="500" height="500"></canvas>
+		</div>
+		<div class="wrapper" style="margin-left: 560; padding: 20px">
+			<nav>
+				<div class="nav-wrapper">
+					<h1 class="titel" style="padding-left:10px">ESA CCC - Christmas & Corona Challenge - Eine Simulation</h1>
+				</div>
+			</nav>
+	
+			<div id="container" class="container">
+				<div class="col s12">
+					<div class="card">
+	
+						<div class="card-content">
+							<!--Content-->
+							<h3><strong>Parameters</strong></h3>
+							<p>Geschwindigkeit: <input id="speed" type="range" min=0 max=0.1 step=0.005 value=0></input><span id="speedText">0</span></p>
+							<p>Ansteckungswahrscheinlichkeit (p): <input id="varP" type="range" min=0 max=1 step=0.02 value=0.16></input><span id="varPText">0.16</span></p>
+							<p>Radius (R): <input id="varR" type="range" min=0 max=0.2 step=0.01 value=0.1></input><span id="varRText">0.1</span></p>
+							<p>Kranheitstage (Z): <input id="varZ" type="range" min=0 max=1000 step=1 value=100></input><span id="varZText">100</span></p>
+							<h4>Startwerte:</h4>
+							<p>Gesamtanzahl Kugeln (N): <input id="varN" type="range" min=1 max=1000 step=1 value=100></input><span id="varNText">100</span></p>
+							<p>Anzahl kranker Kugeln (K): <input id="varK" type="range" min=0 max=100 step=1 value=1></input><span id="varKText">1</span></p>
+							<button id="startBtn">Neustart</button>
+
+							<h3><strong>Aktueller Status:</strong></h3>
+							<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140">
+								<text id="blkTxtN" x="10" y="50" font-size="12">200</text>
+									<rect id="blkN" x="50" y="35" width="300" height="20" rx="3" ry="3" fill="rgb(78, 91, 211)" />
+								<text id="blkTxtG" x="10" y="80" font-size="12">280</text>
+									<rect id="blkG" x="50" y="65" width="280" height="20" rx="3" ry="3" fill="rgb(78, 187, 87)" />
+								<text id="blkTxtK" x="10" y="110" font-size="12">90</text>
+									<rect id="blkK" x="50" y="95" width="90" height="20" rx="3" ry="3" fill="rgb(165, 46, 37)" />
+							</svg>
+
+							<h3><strong>Keystrokes</strong></h3>
+
+							
+							<h4><u>Projektion der Szene ändern:</u></h4>
+							<ul>
+							<li><p><b>O:</b> Schaltet den Modus für die orthogonale Ansicht ein, wobei die Tasten <b>B</b> und <b>Shift+B</b> verwendet werden können. Der Tastendruck <b style="color:red;">V</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							<li><p><b>F:</b> Schaltet den Modus für die Frustum-Ansicht ein, wobei die Tasten <b>B</b> und <b>Shift+B</b> verwendet werden können. Der Tastendruck <b style="color:red;">V</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							<li><p><b>P:</b> Schaltet den perspektivischen Ansichtsmodus ein, mit zusätzlichem Tastendruck <b>V</b> und <b>Shift+V</b>, aber der Tastendruck <b style="color:red;">B</b> funktioniert hier <u style="color:red;">nicht</u></li>
+							</ul>
+
+							<h4><u>Kamera und Umlaufbahn bewegen:</u></h4>
+							<ul>
+							<li><p><b> D:</b> Kamera Abstand zu Zentrum mit D und Schift+D anpassen. </li>
+
+							<li><p><b>C:</b> Orbit mit der Kamera.</li>
+							<li><p><b>H:</b> Kamera mit H und Schift+H hoch und runter bewegen.</li>
+							<li><p><b>B:</b> Abmessungen der kameranahen Ebene, mit Schift+B die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den perspektivischen Ansichtsmodus)</li>
+							<li><p><b>V:</b> Änderung der Sichtfeld-Winkel, mit Schift+V die engegengesetzte Richtung (funktioniert <u style="color:red;">nicht</u> in den orthogonale und frustum Ansichtsmodus)</li>
+							</ul>
+
+							<h4><u>Simulation:</u></h4>
+							<ul>
+							<li><p><b>I: </b> Startet die Simulation mit einer Geschwindigkeit von 0.01 oder stopt die Simulation. </li>
+							</ul>
+
+						</div>
+	
+	
+					</div>
+				</div>
+			</div>
+			</div>
+	</body>
+</html>
