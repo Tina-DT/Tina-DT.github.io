@@ -149,12 +149,13 @@ var app = (function() {
                 }
             }
 
-            document.getElementById("blkTxtN").innerHTML = dataInformation.n.toString();
-            document.getElementById("blkTxtG").innerHTML = (dataInformation.n - activK).toString();
+            var modelsN = models.length;
+            document.getElementById("blkTxtN").innerHTML = modelsN.toString();
+            document.getElementById("blkTxtG").innerHTML = (modelsN - activK).toString();
             document.getElementById("blkTxtK").innerHTML = activK.toString();
 
-            document.getElementById("blkG").width.baseVal.value = (dataInformation.n - activK) * 300 / dataInformation.n;
-            document.getElementById("blkK").width.baseVal.value = activK * 300 / dataInformation.n;
+            document.getElementById("blkG").width.baseVal.value = (modelsN - activK) * 300 / modelsN;
+            document.getElementById("blkK").width.baseVal.value = activK * 300 / modelsN;
 
             render();
         },
